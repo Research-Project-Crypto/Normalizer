@@ -1,0 +1,11 @@
+
+.vs/
+.vscode/
+bin/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+normalized_data/
+raw_data/
