@@ -1,6 +1,11 @@
 #pragma once
 #include <cstring>
 #include <iostream>
+#include <mutex>
+
+#ifdef _WIN32
+#include "Windows.h"
+#endif
 
 namespace program
 {
@@ -8,6 +13,8 @@ namespace program
 
     class Logger
     {
+        mutable std::mutex mutex;
+
     public:
         enum class LogLevel {
             Verbose,
@@ -19,11 +26,15 @@ namespace program
 
         Logger(LogLevel logLevel)
         {
-            /*HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+#ifdef _WIN32
+            HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+
             DWORD console_mode;
             GetConsoleMode(console_handle, &console_mode);
+
             console_mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
-            SetConsoleMode(console_handle, console_mode);*/
+            SetConsoleMode(console_handle, console_mode);
+#endif
 
             this->m_log_level = logLevel;
         }
@@ -80,7 +91,7 @@ namespace program
         LOG_ARGS
             void log(LogLevel level, const char* service, const char* format, Args&& ...args)
         {
-            const uint8_t alloc_size = 16;
+            const size_t alloc_size = 8;
 
             char color[alloc_size];
             char level_string[alloc_size];
@@ -88,35 +99,41 @@ namespace program
             switch (level)
             {
             case LogLevel::Verbose:
-                strcpy_s(color, alloc_size, blue);
-                strcpy_s(level_string, alloc_size, "VERB");
+                strcpy(color, blue);
+                strcpy(level_string, "VERB");
 
                 break;
             case LogLevel::Info:
-                strcpy_s(color, alloc_size, green);
-                strcpy_s(level_string, alloc_size, "INFO");
+                strcpy(color, green);
+                strcpy(level_string, "INFO");
 
                 break;
             case LogLevel::Warning:
-                strcpy_s(color, alloc_size, yellow);
-                strcpy_s(level_string, alloc_size, "WARN");
+                strcpy(color, yellow);
+                strcpy(level_string, "WARN");
 
                 break;
             case LogLevel::Error:
-                strcpy_s(color, alloc_size, red);
-                strcpy_s(level_string, alloc_size, "ERR");
+                strcpy(color, red);
+                strcpy(level_string, "ERR");
 
                 break;
             case LogLevel::Critical:
-                strcpy_s(color, alloc_size, red);
-                strcpy_s(level_string, alloc_size, "CRIT");
+                strcpy(color, red);
+                strcpy(level_string, "CRIT");
 
                 break;
             }
 
-            char message[512];
+            size_t size_needed = snprintf(nullptr, 0, format, std::forward<Args>(args)...);
+            char *message = (char*)malloc(sizeof(char) * size_needed);
             sprintf(message, format, std::forward<Args>(args)...);
+
+            std::lock_guard<std::mutex> lock(this->mutex);
             std::cout << color << "[" << level_string << "/" << service << "] " << reset << message << std::endl;
+
+            // be a good boy and free memory
+            free(message);
         }
     };
 

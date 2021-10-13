@@ -110,14 +110,12 @@ void process_csv(const char* in_file, const char* out)
  */
 int main(int argc, const char** argv)
 {
-    using namespace program;
-
-    //g_log->info("MAIN", "Initiating thread pool.");
+    g_log->info("MAIN", "Initiating thread pool.");
     auto thread_pool_instance = std::make_unique<thread_pool>();
 
     if (argc < 3)
     {
-        //g_log->error("MAIN", "Missing arguments, input_folder and/or output_folder");
+        g_log->error("MAIN", "Missing arguments, input_folder and/or output_folder");
 
         return 1;
     }
@@ -127,7 +125,7 @@ int main(int argc, const char** argv)
 
     if (!std::filesystem::exists(input_folder) || !std::filesystem::exists(output_folder))
     {
-        //g_log->error("MAIN", "Input and/or output folder do not exist.");
+        g_log->error("MAIN", "Input and/or output folder do not exist.");
 
         return 1;
     }
@@ -138,7 +136,7 @@ int main(int argc, const char** argv)
         // = copy all vars above
         g_thread_pool->push([=]()
         {
-            //g_log->info("THREAD", "Processing file: %s", file.path().string().c_str());
+            g_log->info("THREAD", "Processing file: %s", file.path().string().c_str());
 
             if (!file.is_directory())
                 process_csv(file.path().string().c_str(), output_folder);

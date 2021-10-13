@@ -1,4 +1,4 @@
-//#include "logger.hpp"
+#include "logger.hpp"
 #include "thread_pool.hpp"
 
 namespace program
@@ -19,7 +19,7 @@ namespace program
 	{
 		int thread_count = std::thread::hardware_concurrency();
 
-		//g_log->info("THREAD_POOL", "Allocating %d threads in pool.", thread_count);
+		g_log->info("THREAD_POOL", "Allocating %d threads in pool.", thread_count);
 		this->m_thread_pool.reserve(thread_count);
 
 		for (int i = 0; i < thread_count; i++)
@@ -89,12 +89,12 @@ namespace program
 			catch (const std::exception& e)
 			{
 				continue;
-				//g_log->warning("THREAD", "Exception thrown while executing job in thread: %s", e.what());
+				g_log->warning("THREAD", "Exception thrown while executing job in thread: %s", e.what());
 				//LOG(WARNING) << "Exception thrown while executing job in thread:" << std::endl << e.what();
 			}
 		}
 
-		//g_log->info("THREAD", "Thread %d exiting...", std::this_thread::get_id());
+		g_log->info("THREAD", "Thread %d exiting...", std::this_thread::get_id());
 		//LOG(INFO) << "Thread " << std::this_thread::get_id() << " exiting...";
 	}
 }
