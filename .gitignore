@@ -1,11 +1,14 @@
-
 .vs/
-.vscode/
 bin/
+data/
+
+*.gch
+
+# Visual Studio
 *.sln
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
 
-normalized_data/
-raw_data/
+# gmake2
+Makefile
