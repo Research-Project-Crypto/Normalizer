@@ -28,28 +28,20 @@ namespace program
             return m_input_file.filename().c_str();
         }
 
-        void clone_candle(candle* src, candle* dst)
+        void clone_candle(candle* dst, candle* src)
         {
-            memcpy(src, dst, sizeof(candle));
+            memcpy(dst, src, sizeof(candle));
         }
 
         void read_binary_input()
         {
             std::ifstream file(m_input_file.c_str(), std::ios::in | std::ios::binary);
 
-            // read file size
-            file.ignore(std::numeric_limits<std::streamsize>::max());
-            std::streamsize length = file.gcount();
-
-            // seek back to start of stream
-            file.clear();
-            file.seekg(0, std::ios_base::beg);
-
-            for (size_t i = 0; i < length / sizeof(candle); i++)
+            while (!file.eof())
             {
                 std::unique_ptr<candle> candle_data = std::make_unique<candle>();
 
-                file.read((char*)candle_data.get(), sizeof(candle));
+                file.read((char*)candle_data.get(), 8 * 16);
 
                 m_candles.push_back(std::move(candle_data));
             }
@@ -64,13 +56,14 @@ namespace program
             for (size_t i = 0; i < m_candles.size(); i++)
             {
                 std::unique_ptr<candle>& curr_candle = m_candles.at(i);
-                this->clone_candle(curr_candle.get(), &curr_candle_backup);
+                this->clone_candle(&curr_candle_backup, curr_candle.get());
 
                 if (i)
                     curr_candle->normalize(&previous_candle);
 
-                this->clone_candle(&curr_candle_backup, &previous_candle);
+                this->clone_candle(&previous_candle, &curr_candle_backup);
             }
+            m_candles.erase(m_candles.begin());
 
             this->write_binary_out();
         }
